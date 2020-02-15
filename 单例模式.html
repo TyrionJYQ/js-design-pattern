@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>单例模式</title>
+    <style>
+        .modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            height: 200px;
+            width: 200px;
+            border: 1px solid sandybrown;
+        }
+    </style>
+</head>
+
+<body>
+    <button class="modal-btn">弹窗</button>
+</body>
+<script>
+
+    // 管理单例
+    //&& instance.setContent.apply(instance, arguments) 
+    function getSingleton(fn) {
+        let instance;
+        return function () {
+            return instance && instance.setContent.apply(instance, arguments) || (instance = fn.apply(this, arguments))
+        }
+    }
+
+    // 创建弹窗
+    function createModal(option = {}) {
+        let div = document.createElement('div')
+        div.innerHTML = option.text || '弹窗'
+        div.className = 'modal'
+        div.style.display = 'none'
+        document.body.appendChild(div)
+        return {
+            option,
+            show() {
+                div.style.display = 'block'
+            },
+            setContent(option) {
+                if (div.innerText === option.text) return this
+                div.innerHTML = option.text || '弹窗'
+                return this
+            }
+        }
+    }
+
+    // 创建弹窗单例
+    let createSingletonModal = getSingleton(createModal);
+
+
+    document.querySelector('.modal-btn').addEventListener('click', () => {
+
+        let m1 = createSingletonModal({ text: '我是弹窗1' })
+        m1.show()
+        setTimeout(() => {
+            let m2 = createSingletonModal({ text: '我是弹窗2' })
+            m2.show()
+            console.log(m1 === m2);  // true
+        }, 3000);
+    })
+</script>
+
+</html>
