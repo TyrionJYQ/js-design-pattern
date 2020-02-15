@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>设计模式之发布订阅(观察者模式)</title>
+</head>
+
+<body>
+    <ul>
+        <li>苹果价格：<span class="apple">1</span>元</li>
+        <li>香蕉价格：<span class="banana">2</span>元</li>
+    </ul>
+</body>
+<script>
+    /**
+    *  发布订阅（又叫观察者模式）
+    *  实现发布订阅模式
+    **/
+
+    class Event {
+        constructor() {
+            // 缓存保存回调函数
+            this.callbacks = {}
+        }
+        /**
+         * 发布事件
+         * @param {*} name
+         * @param {*} args
+         * 
+         */
+        $emit(name, args) {
+            const cbs = this.callbacks[name];
+            if (!cbs || cbs.length === 0) return false;
+            cbs.forEach(cb => cb.call(this, args))
+        }
+
+        /**
+         * 
+         * 订阅事件
+         * @param {*} name
+         * @param {*} fn
+         * 
+         */
+
+        $on(name, fn) {
+            if (!this.callbacks[name]) {
+                this.callbacks[name] = []
+            }
+            if (typeof fn !== 'function') {
+                throw new Error('param:fn must be a function')
+            }
+            this.callbacks[name].push(fn)
+        }
+
+        /**
+        * 
+        * 取消订阅事件
+        * @param {*} name
+        * @param {*} fn
+        * 
+        */
+        $off(name) {
+            this.callbacks[name] = null
+        }
+    }
+
+    let event = new Event();
+    // event.$on('test', function(args) {
+    //     console.log(args)
+    // })
+    // event.$emit('test', 'foo')
+    // event.$emit('test', 'bar')
+    // event.$off('test')
+    // event.$emit('test', 'foo')
+
+
+    // 实现响应式
+    function watch(target) {
+        if (typeof target !== 'object') {
+            throw new Error('param must be a targetect');
+        }
+        let newTarget = {}
+        for (let prop in target) {
+            // 监听数据变化
+            event.$on(prop, function (val) {
+                // 更新视图
+                document.querySelector('.' + prop).innerText = val;
+            })
+            // 初始化页面数据
+            event.$emit(prop, target[prop])
+            if (target.hasOwnProperty(prop)) {
+                Object.defineProperty(newTarget, prop, {
+                    get: function () {
+                        return target[prop]
+                    },
+                    set: function (val) {
+                        console.log(val);
+                        if (val === newTarget[prop]) {
+                            return console.log('数据未发生变化');
+                        }
+                        target[prop] = val
+                        event.$emit(prop, val)
+                    }
+                })
+            }
+        }
+        return newTarget
+    }
+    var fruits = {
+        apple: 2,
+        banana: 3
+    }
+    var f2 = watch(fruits)
+    // 更新价格
+    setTimeout(() => f2.apple = 16, 2000)
+
+</script>
+
+</html>
