@@ -24,8 +24,7 @@
 <script>
 
     // 管理单例
-    //&& instance.setContent.apply(instance, arguments) 
-    function getSingleton(fn) {
+   function getSingleton(fn) {
         let instance;
         return function () {
             return instance && instance.setContent.apply(instance, arguments) || (instance = fn.apply(this, arguments))
