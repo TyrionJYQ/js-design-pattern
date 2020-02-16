@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>代理模式</title>
+    <style>
+        div.scroll {
+            height: 5000px;
+            width: 100px;
+            background-color: aquamarine;
+        }
+    </style>
+</head>
+
+<body>
+    <input type="checkbox" id='1'>音乐1
+    <input type="checkbox" id='2'>音乐2
+    <input type="checkbox" id='3'>音乐3
+    <input type="checkbox" id='4'>音乐4
+    <input type="checkbox" id='5'>音乐5
+    <input type="checkbox" id='6'>音乐6
+    <input type="checkbox" id='7'>音乐7
+    <input type="checkbox" id='8'>音乐8
+    <input type="checkbox" id='9'>音乐9
+    <input type="checkbox" id='10'>音乐10
+
+    <div class="img-wrapper"></div>
+    <input type="text">
+    <div class="scroll"></div>
+</body>
+<script>
+    /***************************************************函数节流******************************************************/
+    let i = 0;
+    const throttle = (fn, wait) => {
+        let startTime = Date.now();
+        return function () {
+            if (Date.now() - startTime > wait) {
+                fn.apply(null, arguments)
+                startTime = Date.now();
+            }
+        }
+    }
+
+    function handleScroll() {
+        // 获取滚动位置
+        let pos = document.documentElement.scrollTop || document.body.scrollTop
+        console.log(`当前滚动位置:${pos}`)
+        // 根据pos展示请求真实的图片
+    }
+
+    // window.addEventListener('scroll', handleScroll)
+    window.addEventListener('scroll', throttle(handleScroll, 500))
+
+
+    /***************************************************函数防抖******************************************************/
+    const debounce = (fn, wait) => {
+        let timer;
+        return function () {
+            if (timer) clearInterval(timer);
+            timer = setTimeout(fn, wait);
+        }
+    }
+    function handleInput() {
+        console.log('发送校验请求')
+    }
+
+    // document.querySelector('input').addEventListener('input', handleInput)
+    document.querySelector('input[type="text"]').addEventListener('input', debounce(handleInput, 1000))
+
+
+    /***************************************************图片占位图******************************************************/
+    const myImage = (function () {
+        const img = new Image();
+        document.querySelector('.img-wrapper').appendChild(img)
+        return {
+            setSrc: function (src) {
+                img.src = src
+            }
+        }
+    })()
+    const loadingImge = './assets/loading.gif'
+    const realSrc = "https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1581861147636&di=c751d2a6684f214552678cceea436c3c&imgtype=0&src=http%3A%2F%2Fattach.bbs.miui.com%2Fforum%2F201312%2F06%2F211410sxjtbyaj9abo5qzh.jpg"
+    const proxyImage = (function () {
+        // 这里的img用来请求真实的图片地址
+        const img = new Image()
+        img.onload = function () {
+            // 替换图片地址
+            myImage.setSrc(this.src)
+        }
+        return {
+            setSrc: function (src) {
+                myImage.setSrc(loadingImge)
+                // 请求真实图片地址
+                img.src = src
+            }
+        }
+    })()
+
+    // myImage.setSrc(realSrc)
+    proxyImage.setSrc(realSrc)
+
+    /*************************************************虚拟代理合并请求*********************************************************************/
+    const uploadMusic = id => console.log(`正在上传音频文件id${id}`)
+    let checkboxes = document.querySelectorAll('input[type="checkbox"]')
+    const proxyUploadMusic = (fn, wait) => {
+        let timer, cache = [];
+        return function (id) {
+            cache.push(id)
+            if (timer) {
+                return;
+            }
+            timer = setTimeout(() => {
+                console.log(cache)
+                fn.call(null, cache.join(','))
+                clearTimeout(timer)
+                timer = null
+                cache.length = 0;
+            }, wait)
+        }
+
+    }
+    let uplaodFn = proxyUploadMusic(uploadMusic, 2000)
+    for (let i = 0, c, eles = document.querySelectorAll('input[type="checkbox"]'); c = eles[i++];) {
+        c.onclick = function () {
+            if (this.checked) {
+                // uploadMusic(this.id)
+                uplaodFn(this.id)
+            }
+        }
+
+    }
+
+
+</script>
+
+</html>
