@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>装饰者模式</title>
+</head>
+
+<body>
+    <form action="">
+        <input type="text" name="username" placeholder="请输入用户名">
+        <input type="submit" value="提交">
+    </form>
+</body>
+<script>
+    /*
+    Function.prototype.before = function (beforeFn) {
+        let _this = this
+        return function () {
+            beforeFn.apply(this, arguments)
+            return _this.apply(this, arguments)  //返回原有函数执行结果
+
+        }
+    }
+
+    let f1 = function () {
+        alert(3)
+    }
+    f1 = f1.before(function () {
+        alert(2)
+    }).before(function () {
+        alert(1)
+    })
+    f1()
+
+    Function.prototype.after = function (afterFn) {
+        let _this = this
+        return function () {
+            var ret = _this.apply(this, arguments)
+            afterFn.apply(this, arguments)
+            return ret //返回原有函数执行结果
+
+        }
+    }
+
+    let f2 = function () {
+        console.log(1)
+    }
+    f2 = f2.after(function () {
+        console.log(2)
+    }).after(function () {
+        console.log(3)
+    })
+    f2() //控制台依次打印1,2,3
+
+    */
+    /******************************************使用装饰器模式改写表单验证和提交*******************************************/
+    Function.prototype.before = function (beforeFn) {
+        if (typeof beforeFn !== 'function') {
+            throw new Error('beforeFn must be a function')
+        }
+        let _this = this
+        return function () {
+            if (beforeFn.apply(this, arguments) === false) return
+            _this.apply(this, arguments)
+        }
+    }
+
+    function checkForm() {
+        let username = document.querySelector('form').username
+        if (!username.value || !username.value.trim()) {
+            alert('请输入用户名')
+            return false
+        }
+        return true
+    }
+
+    function submit() {
+        alert('用户信息提交成功')
+    }
+    submit = submit.before(checkForm)
+    document.querySelector('form').onsubmit = submit
+
+    /******************************************函数参数修改*************************************************************/
+
+    function Request(url, params) {
+        let baseParams = { role: 'administrator' }
+        requestParams = Object.assign({}, baseParams, params)
+        console.log(`正在发送ajax请求,请求参数为${JSON.stringify(requestParams)}`)
+    }
+
+    Request('xxxxxxxx')
+    Request = Request.before(() => null)
+    Request('xxxxxxxx', { role: 'supreRole' })
+</script>
+
+</html>
