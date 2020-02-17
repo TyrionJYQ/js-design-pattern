@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>中介者模式</title>
+    <style>
+        .wrapper {
+            height: 500px;
+            width: 60%;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        select {
+            margin-right: 40px;
+            margin-bottom: 40px;
+        }
+
+        p {
+
+            margin-bottom: 50px;
+        }
+
+        #btn {
+            pointer-events: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrapper">
+        <select name="mask-type" id="type">
+            <option value="">请选择口罩种类</option>
+            <option value="KN95">KN95口罩</option>
+            <option value="N95">N95口罩</option>
+            <option value="NORMAL">普通医用口罩</option>
+        </select>
+
+        <select name="mask-count" id="count" placeholder="请选择口罩数量">
+            <option value="">请选择口罩数量</option>
+            <option value="1">1</option>
+            <option value="3">3</option>
+            <option value="5">5</option>
+            <option value="7">7</option>
+        </select>
+        <br />
+        <p>您选择的口罩种类:<span id="info-type">未选择</span></p>
+        <p>您选择的口罩数量:<span id="info-count">未选择</span> </p>
+
+        <input type="submit" id="btn" value="请选择口罩种类">
+    </div>
+</body>
+<script>
+    // 口罩种类
+    const MASKS = {
+        "KN95": { text: "KN95口罩", count: 3 },
+        "N95": { text: "N95口罩", count: 2 },
+        "NORMAL": { text: "普通医用口罩", count: 7 }
+    }
+    // 最大购买数量
+    const CAN_BUY_MAX_COUNT = 5
+    /*******************************************普通处理**********************************************************/
+    // const getDom = id => document.getElementById(id)
+    // const selType = getDom('type')
+    // const selCount = getDom('count')
+    // const infoType = getDom('info-type')
+    // const infoCount = getDom('info-count')
+    // const btn = getDom('btn')
+
+    // selType.onchange = function () {
+    //     if (!this.value) { // 未选择
+    //         infoType.innerText = '未选择'
+    //         btn.value = "请选择口罩种类"
+    //         return
+    //     } else {
+    //         infoType.innerText = MASKS[this.value]['text']
+    //     }
+    //     // 是否选择口罩数量
+    //     let count = selCount.value * 1;
+    //     if (!count) {
+    //         btn.value = "请选择口罩数量"
+
+    //     }
+    //     if (count && this.value) {
+    //         if (count > MASKS[this.value]['count']) {
+    //             btn.value = "库存不足"
+    //         }
+    //         if (count > CAN_BUY_MAX_COUNT) {
+    //             btn.value = "超过限购只数5"
+    //         } else {
+    //             btn.value = "加入购物车"
+    //             btn.style['pointer-events'] = 'all'
+    //         }
+    //     }
+
+
+    // }
+
+    // selCount.onchange = function () {
+    //     // 是否选择数量
+    //     let count = this.value * 1
+    //     let type = selType.value
+    //     if (!type) { //未选择类型
+    //         btn.value = "请选择口罩种类"
+    //     }
+    //     if (!count) { // 未选择种类
+    //         infoCount.innerText = '未选择'
+    //         if (type) btn.value = "请选择口罩数量"
+    //     }
+
+    //     if (count && type) { // 库存和限购校验
+    //         infoCount.innerText = this.value
+    //         if (MASKS[type]['count'] < count) {
+    //             btn.value = "库存不足"
+    //             return
+    //         }
+    //         if (count > CAN_BUY_MAX_COUNT) {
+    //             btn.value = "超过限购只数5"
+    //         } else {
+    //             btn.value = "加入购物车"
+    //             btn.style['pointer-events'] = 'all'
+    //         }
+    //     }
+
+    // }
+    // btn.onclick = () => alert('加入购物车成功')
+
+
+    /*******************************************使用中介者模式处理**********************************************************/
+    const store = {
+        changed(type) {
+            if (type === selType) {
+                infoType.innerText = MASKS[type.value] ? MASKS[type.value]['text'] : '未选择'
+            }
+            if (type === selCount) {
+                infoCount.innerText = type.value ? type.value : '未选择'
+            }
+            let count = selCount.value
+            if (!selType.value) {
+                btn.value = "请选择口罩种类"
+
+                return
+            }
+            if (!count) {
+                btn.value = "请选择口罩数量"
+
+                return
+            }
+
+            if (count && selType.value) { // 库存和限购校验
+                if (MASKS[selType.value]['count'] < count) {
+                    btn.value = "库存不足"
+                    return
+                }
+                if (count > CAN_BUY_MAX_COUNT) {
+                    btn.value = "超过限购只数5"
+                } else {
+                    btn.value = "加入购物车"
+                    btn.style['pointer-events'] = 'all'
+                }
+            }
+        }
+    }
+    selCount.onchange = function () { store.changed(this) }
+    selType.onchange = function () { store.changed(this) }
+    btn.onclick = () => alert('加入购物车成功')
+</script>
+
+</html>
