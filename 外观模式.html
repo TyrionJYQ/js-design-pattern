@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<button>事件绑定</button>
+<body>
+
+</body>
+<script>
+    myEvent = {
+        stop: function (e) {
+            if (typeof e.preventDefault() === "function") {
+                return e.preventDefault();
+            }
+            if (typeof e.stopPropagation() === "function") {
+                return e.stopPropagation();
+            }
+            //for IE
+            if (typeof e.returnValue === "boolean") {
+                return (e.returnValue = false);
+            }
+            if (typeof e.cancelBubble === "boolean") {
+                return (e.cancelBubble = true);
+            }
+        },
+        bindEvent(dom, type, fn) {
+            if (dom.addEventListener) {
+                dom.addEventListener(type, fn, false);
+            } else if (dom.attachEvent) {
+                dom.attachEvent('on' + type, fn);
+            } else {
+                dom['on' + type] = fn;
+            }
+        }
+    }
+    myEvent.bindEvent(document.querySelector('button'), 'click', () => console.log('button clicked'))
+</script>
+
+</html>
