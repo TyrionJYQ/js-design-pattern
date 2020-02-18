@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>工厂模式</title>
+    <style>
+        .wrapper {
+            position: fixed;
+            width: 100%;
+            bottom: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrapper">
+        <button type="success">成功</button>
+        <button type="fail">失败</button>
+        <button type="warn">警告</button>
+        <button type="info">提示</button>
+    </div>
+
+</body>
+<script>
+    const ICONS = {
+        success: './assets/success.png',
+        warn: './assets/warn.png',
+        info: './assets/info.png',
+        fail: './assets/fail.png',
+    }
+    let id = 0
+
+    function NotificationCreater(options) {
+        const div = document.createElement('div')
+        div.style.position = 'fixed'
+        div.style.height = '30px'
+        div.style.width = '200px'
+        div.style.border = "1px  solid #eee"
+        div.style.borderRadius = "3px"
+        const { type, text } = options;
+        div.innerHTML = `<img src=${ICONS[type]}>  ${text}`
+        document.body.appendChild(div)
+        return div
+    }
+
+
+    const Notification = options => {
+        // options校验
+        const { text, type } = options;
+        if (!type || !text) {
+            throw new Error('params of optios is illegal')
+        }
+        let instace = new NotificationCreater(options)
+        instace.style.top = (id * 32) + 'px'
+        id++
+    }
+    document.querySelectorAll('button').forEach(btn => btn.addEventListener('click', function () {
+        Notification({})   //工厂模式.html:92 Uncaught Error: params of optios is illegal
+        // Notification({ type: this.getAttribute('type'), text: this.getAttribute('type') })
+    }))
+</script>
+
+</html>
